@@ -161,21 +161,25 @@ EOT;
 					
 					$text = '<div id="feed_menu">';
 					$res_feed = $db->do_query ();
+					$i = 1;
+					$first_feed = "";
 					
 					if ($res_feed->num_rows > 0) {
 						while ($rs_feed = $res_feed->fetch_object()) {
-							if ($rs_feed->Feed_Name == "Spiegel") {
+							if ($i == 1) {
 								$class = 'active';
+								$first_feed = $rs_feed->Feed_Name;
 							} else {
 								$class = 'inactive';
 							}
 							
 							$text.= '<span id="get_rss:box' . $rs->id . '_' . $rs_feed->Feed_Name . '" class="action_span ' . $class . '">' . $rs_feed->Feed_Name . '</span>';
+							$i++;
 						}
 					}
 					
 					$text.= '</div><div id="feed_news">';					
-					$text.= get_rss($db, "Spiegel");
+					$text.= get_rss($db, $first_feed);
 					$text.= '</div>';					
 					
 					$box->set_content($text);

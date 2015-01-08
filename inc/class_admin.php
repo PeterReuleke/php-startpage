@@ -210,6 +210,36 @@ EOT;
 				echo '</table><br /><span id="new_termin:id_' . $id . '" class="action_span">Neuen Termin hinzufügen</span>';
 			case 4:
 				// RSS
+				
+				$this->db->set("what" , "Rss.ID, Rss.Feed_Name, Rss.Feed_Adresse");
+				$this->db->set("from" , "Rss INNER JOIN Box ON Rss.Box_ID = Box.ID");
+				$this->db->set("where", "Box.ID = '$id'");
+				$this->db->set("order", "Rss.ID ASC");
+				$this->db->set("show" ,  0);
+							
+				$res = $this->db->do_query ();
+
+				echo <<<EOT
+					<table id="sortierbar">
+						<tr>
+							<th class="th3">Feed Name</th>
+							<th class="th4">Feed Adresse</th>
+							<th class="th1"></th>
+							<th class="th1"></th>
+						</tr>
+EOT;
+				$i = 1;
+
+				while ($rs = $res->fetch_object()) {
+					echo '<tr>
+							<td class="td' . if_int($i) . '">' . $rs->Feed_Name . '</td>
+							<td class="td' . if_int($i) . '">' . $rs->Feed_Adresse . '</td>
+							<td class="td' . if_int($i) . '"><span id="edit_rss:' . $id . '_' . $rs->ID . '" class="action_span"><img src="img/edit.gif" class="pic" title="Bearbeiten" /></span></td>
+							<td class="td' . if_int($i) . '"><span id="remove_rss:' . $id . '_' . $rs->ID . '" class="action_span"><img src="img/delete.gif" class="pic" title="Löschen" /></span></td>
+						  </tr>';					
+					$i++;
+				}
+				echo '</table><br /><span id="new_rss:id_' . $id . '" class="action_span">Neuen Rss-Feed hinzufügen</span>';
 				break;
 			default:
 				echo '<p class="error">Fehler</p>';
@@ -839,6 +869,158 @@ EOT;
 	 	}
 
 		$sql = "DELETE FROM Links WHERE ID = ?";		
+		$res = $this->db->prepare($sql);
+		$res->bind_param('i', $id);
+		$res->execute();
+
+		$this->show_box($box_id);
+	 }
+	 
+	/**
+	 *	-> Diese Function gibt eine Maske zur Erstellung eines neuen Rss Feeds aus
+	 */
+	 
+	 public function new_rss ($id) {
+
+		$this->show_box($id);			
+		
+		echo <<<EOT
+			<div id="alert_box">
+			<table>
+				<tr>
+					<td>Name</td>
+					<td><input type="text" id="Name" size="60" class="input"><td>
+				</tr>
+				<tr>
+					<td>URL</td>
+					<td><input type="text" id="URL" size="60" class="input"><td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<span id="insert_rss:id_$id" class="action_span">Hinzufügen</span>
+						<span id="show_box:Name_$id" class="action_span">Abbrechen</span>
+			 		</td>
+			</table>
+			</div>';
+EOT;
+			
+	}
+	
+	/**
+	 *	-> Diese Function fügt einen neuen Rss Feed hinzu
+	 */
+	 
+	public function insert_rss ($id, $name, $url) {
+
+		$name = htmlentities($name);
+		$url = htmlentities($url);
+	
+ 		if (trim($id) == "" or trim($name) == "" or trim($url) == "") {
+ 			echo '<p class="error"><b>Fehler:</b> unvollständige Eingabe</p>';
+ 			die();
+ 		}
+
+		$sql = "INSERT INTO Rss ( Box_ID, Feed_Name, Feed_Adresse) VALUES ( ?, ?, ?)";		
+		$res = $this->db->prepare($sql);
+		$res->bind_param('iss', $id, $name, $url);
+		$res->execute();
+
+		$this->show_box($id);
+
+	}
+	
+	/**
+	 *	-> Diese Function gibt eine Maske zur Bearbeitung eines Rss Feeds aus
+	 */
+	 
+	public function edit_rss ($box_id, $id) {
+
+		$this->db->set("what" , "Rss.ID, Rss.Feed_Name, Rss.Feed_Adresse");
+		$this->db->set("from" , "Rss INNER JOIN Box ON Rss.Box_ID = Box.ID");
+		$this->db->set("where", "Box.ID = '$box_id'");
+		$this->db->set("order", "Rss.ID ASC");
+		$this->db->set("show" ,  0);
+					
+		$res = $this->db->do_query ();
+
+		echo <<<EOT
+			<table>
+				<tr>
+					<th class="th3">Name</th>
+					<th class="th4">Feed Adresse</th>
+					<th class="th1"></th>
+					<th class="th1"></th>
+				</tr>
+EOT;
+		$i = 1;
+
+		while ($rs = $res->fetch_object()) {
+			if ($id == $rs->ID) {
+				echo '<tr>
+						<td class="td' . if_int($i) . '"><input type="text" id="name" class="input" value="' . $rs->Feed_Name . '"></td>
+						<td class="td' . if_int($i) . '"><input type="text" id="url" class="input" size="60" value="' . $rs->Feed_Adresse . '"></td>
+						<td class="td' . if_int($i) . '"><span id="update_rss:' . $box_id . '_' . $rs->ID . '" class="action_span"><img src="img/check_green.gif" class="pic" /></span></td>
+						<td class="td' . if_int($i) . '"><span id="show_box:Name_' . $box_id . '" class="action_span"><img  src="img/delete.gif" class="pic" /></span></td>
+					  </tr>';	
+			} else {
+				echo '<tr>
+						<td class="td' . if_int($i) . '">' . $rs->Feed_Name . '</td>
+						<td class="td' . if_int($i) . '">' . $rs->Feed_Adresse . '</td>
+						<td class="td' . if_int($i) . '"></td>
+						<td class="td' . if_int($i) . '"></td>
+					  </tr>';	
+			}
+				
+			$i++;
+		}
+	}
+	
+	/**
+	 *	-> Diese Function ändert einen Rss Feed
+	 */
+	 
+	public function update_rss ($box_id, $id, $name, $url) {
+		$name = htmlentities($name);
+		$url = htmlentities($url);
+	
+ 		if (trim($box_id) == "" or trim($id) == "" or trim($name) == "" or trim($url) == "") {
+			echo '<p class="error"><b>Fehler:</b> unvollständige Eingabe</p>';
+			die();
+ 		}
+
+		$sql = "UPDATE Rss SET Feed_Name = ?, Feed_Adresse = ? WHERE ID = ?";		
+		$res = $this->db->prepare($sql);
+		$res->bind_param('ssi', $name, $url, $id);
+		$res->execute();
+		
+		$this->show_box($box_id);
+	}
+	
+	/**
+	 *	-> Diese Function gibt ein Fenster aus, welches den Benutzer fragt, ob er den Rss Feed wirklich löschen will
+	 */
+	
+	public function remove_rss ($box_id, $id) {
+		$this->show_box($box_id);
+		
+		echo '<div id="alert_box">
+				<p>Wollen Sie diesen Feed wirklich löschen?</p>
+				<span id="delete_rss:' . $box_id . '_' . $id . '" class="action_span">Ja</span>
+				<span id="show_box:Name_' . $box_id . '" class="action_span">Nein</span>
+			  </div>';
+	}
+	
+	/**
+	 *	-> Diese Function löscht einen Rss Feed
+	 */
+	 
+	 public function delete_rss ($box_id, $id) {
+	 	if (trim($box_id) == "" or trim($id) == "") {
+	 		die('<p class="error"><b>Fehler:</b> unvollständige Eingabe</p>');
+	 	}
+
+		$sql = "DELETE FROM Rss WHERE ID = ?";		
 		$res = $this->db->prepare($sql);
 		$res->bind_param('i', $id);
 		$res->execute();

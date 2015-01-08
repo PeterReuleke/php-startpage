@@ -26,12 +26,12 @@ window.addEvent('domready', function() {
 	    	var data2 = '',
 	    		menu = '',
 	    		value = '',
-	    		actions = ['insert_box', 'insert_menu', 'update_menu', 'remove_link', 'update_link', 'insert_link', 'update_box', 'update_theme'];
+	    		actions = ['insert_box', 'insert_menu', 'update_menu', 'remove_link', 'update_link', 'insert_link', 'update_box', 'update_theme', 'insert_rss', 'update_rss', 'remove_rss'];
 	    		
 	    		
 	    	
 			if (this.action == "insert_box" || this.action == "insert_menu" || this.action == "update_menu" || this.action == "remove_link" || 
-				this.action == "update_link" || this.action == "insert_link" || this.action == "update_box" || this.action == "update_theme") {			
+				this.action == "update_link" || this.action == "insert_link" || this.action == "update_box" || this.action == "update_theme" || this.action == "insert_rss" || this.action == "update_rss" || this.action == "remove_rss") {			
 				$$('#admin_main .input').each(function(el) {
 					value = string_to_url(el.get('value'));					
 					
@@ -378,12 +378,15 @@ var start_sortieren = function () {
 	
 	var start_rss = function () {
 		$$('#feed_menu span').each(function(el) {
+		
 			el.addEvent('click', function() {				
 				$$('#feed_menu span').each(function(ele){
 					if (ele == el) {
 						ele.set('class', 'active');
 					} else {
-						ele.set('class', 'inactive');
+						if (ele.getOffsetParent().get('id') == el.getOffsetParent().get('id')) {
+							ele.set('class', 'inactive');
+						}						
 					}
 				});
 						
@@ -402,7 +405,7 @@ var start_sortieren = function () {
 	
 				AjaxReq.send('feed=' + feed);
 			});
-		});
+		});	
 	}
 	
 	// Debug

@@ -148,11 +148,29 @@
 				show_calender($mysql, $_REQUEST['month']);
 				break;
 				
-			// Rss-News anzeigen
+			// Rss
 			
 			case "get_rss":
 				echo get_rss($mysql, $_REQUEST['feed']);
 				break;
+			case "new_rss":
+				$admin->new_rss($_REQUEST['id']);
+				break;
+			case "insert_rss":
+				$admin->insert_rss($_REQUEST['id'], $_REQUEST['Name'], $_REQUEST['URL']);
+				break;
+			case "edit_rss":
+				$admin->edit_rss($_REQUEST['what'], $_REQUEST['id']);
+				break;
+			case "update_rss":		
+				$admin->update_rss($_REQUEST['what'], $_REQUEST['id'], $_REQUEST['name'], $_REQUEST['url']);
+				break;
+			case "remove_rss":
+				$admin->remove_rss($_REQUEST['what'], $_REQUEST['id']);
+				break;
+			case "delete_rss":
+				$admin->delete_rss($_REQUEST['what'], $_REQUEST['id']);
+				break;	
 				
 			// Thema
 			
